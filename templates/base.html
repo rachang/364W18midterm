@@ -1,12 +1,13 @@
+{% block content %}
 
-
-{% block content1 %}
-
-<form action="{{ url_for('home') }}" method="POST">
-    {{ form.name.label() }}{{ form.name() }}<br>
-    {{ form.submit() }}
-    {{ form.hidden_tag() }}
-</form>
-
+This is the base template of an application that's a little bit like a mini-mini-mini version of <a href="https://www.wunderground.com/" alt="link to weather underground site">Weather Underground</a>.
 
 {% endblock %}
+
+<p>------------</p>
+<h3>Navigation</h3>
+<ul>
+    <li><a href="{{ url_for('index')}}">Go to Location input form.</a></li>
+    <li><a href="{{ url_for('all_us_cities')}}">Weather Conditions for US Cities.</a></li>
+    <li><a href="{{ url_for('non_us_cities')}}">Weather Forecast for Non-US Cities.</a></li>
+</ul>
