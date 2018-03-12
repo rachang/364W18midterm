@@ -106,6 +106,10 @@ class InternationalForm(FlaskForm):
 def page_not_found(e):
     return render_template('404.html'), 404
 
+@app.route('/', methods=["GET","POST"])
+def home():
+    return render_template('base.html')
+
 @app.route('/uscity',methods=["GET","POST"])
 def index():
     form = PlaceForm() # User should be able to enter name after name and each one will be saved, even if it's a duplicate! Sends data with GET
@@ -176,9 +180,15 @@ def index2():
             db.session.add(newplace2)
             db.session.commit()
             place2_id = newplace2.place2_id
-        newcountry = "_".join(country.split(" "))
-        new_city = "_".join(city.split(" "))
-        f = urllib.request.urlopen('http://api.wunderground.com/api/'+api_key+'/geolookup/forecast/q/'+country+'/'+city+'.json')
+        if " " in country:
+            newcountry = "_".join(country.split(" "))
+        else:
+            newcountry = country
+        if " " in city:
+            new_city = "_".join(city.split(" "))
+        else:
+            new_city = city
+        f = urllib.request.urlopen('http://api.wunderground.com/api/'+api_key+'/geolookup/forecast/q/'+newcountry+'/'+new_city+'.json')
         json_string = f.read()
         parsed_json = json.loads(json_string)
         day = parsed_json['forecast']['simpleforecast']['forecastday'][0]["date"]["pretty"]
@@ -189,7 +199,7 @@ def index2():
             forecasts_id = new_forecasts.forecasts_id
             return redirect(url_for('non_us_cities')) 
         else:
-            new_conditions = Forecast(day=day, morning_forecast=morning_forecast, evening_forecast=evening_forecast, place2_id=newplace2.place2_id)
+            new_forecasts = Forecast(day=day, morning_forecast=morning_forecast, evening_forecast=evening_forecast, place2_id=newplace2.place2_id)
             db.session.add(new_forecasts)
             db.session.commit()
             forecasts_id = new_forecasts.forecasts_id
@@ -197,7 +207,7 @@ def index2():
     errors = [v for v in form.errors.values()]
     if len(errors) > 0:
         flash("!!!! ERRORS IN FORM SUBMISSION - " + str(errors))
-    return redirect(url_for('formentry'))
+    return render_template('index2.html',form=form)
 
 @app.route('/nonuscities')
 def non_us_cities():
@@ -207,8 +217,6 @@ def non_us_cities():
         forecast = Forecast.query.filter_by(place2_id=place.place2_id).first()
         all_locations.append((place.city, place.country, forecast.day, forecast.morning_forecast, forecast.evening_forecast))
     return render_template('nonuscity.html', locations=all_locations)
-
-
 ## Code to run the application...
 
 # Put the code to do so here!

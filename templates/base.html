@@ -1,3 +1,4 @@
+
 {% block content %}
 
 This is the base template of an application that's a little bit like a mini-mini-mini version of <a href="https://www.wunderground.com/" alt="link to weather underground site">Weather Underground</a>.
@@ -7,6 +8,7 @@ This is the base template of an application that's a little bit like a mini-mini
 <p>------------</p>
 <h3>Navigation</h3>
 <ul>
+	<li><a href="{{ url_for('home')}}">Home Page.</a></li>
     <li><a href="{{ url_for('index')}}">Go to input for US Cities form.</a></li>
     <li><a href="{{ url_for('index2')}}">Go to input for Non-US Cities form.</a></li>
     <li><a href="{{ url_for('all_us_cities')}}">Weather Conditions for US Cities.</a></li>

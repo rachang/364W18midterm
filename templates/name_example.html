@@ -1,14 +1,11 @@
 {% extends 'base.html' %}
-{% block content %}
 
-<h1>Weather Conditions of US Cities</h1>
+{% block content1 %}
 
-{% for location in locations %}
-    <p>{{ location }}</p>
-    {% if not location %}
-    There are no locations to show.
-	{% endif %}
+<h1>Names</h1>
+
+{% for n in names %}
+    <p>{{ n }}</p>
 {% endfor %}
-
 
 {% endblock %}
