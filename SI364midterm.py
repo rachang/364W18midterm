@@ -121,7 +121,10 @@ def index():
             db.session.add(newplace)
             db.session.commit()
             place_id = newplace.place_id
-        newcity = "_".join(city.split())
+        if " " in city:
+            newcity = "_".join(city.split())    
+        else:
+            newcity = city
         f = urllib.request.urlopen('http://api.wunderground.com/api/'+api_key+'/geolookup/conditions/q/'+state+'/'+newcity+'.json')
         json_string = f.read()
         parsed_json = json.loads(json_string)
@@ -153,12 +156,17 @@ def all_us_cities():
         all_locations.append((place.city, place.state, condition.temperature, condition.weather, condition.observation_time))
     return render_template('uscity.html', locations=all_locations)
 
-@app.route('/nonuscity',methods=["GET","POST"])
+@app.route('/form')
+def formentry():
+    form = InternationalForm()
+    return render_template('index2.html',form=form)
+
+@app.route('/nonuscity', methods=["GET","POST"])
 def index2():
     form=InternationalForm()
     if request.args:
-        city = form.city.data
-        country = form.country.data
+        city = request.args.get('city')
+        country = request.args.get('country')
         newplace2 = Place2.query.filter_by(city=city, country=country).first()
         if newplace2:
             place2_id = newplace2.place2_id
@@ -168,9 +176,9 @@ def index2():
             db.session.add(newplace2)
             db.session.commit()
             place2_id = newplace2.place2_id
-        newcountry = "_".join(country.split())
-        new_city = "_".join(city.split())
-        f = urllib.request.urlopen('http://api.wunderground.com/api/'+api_key+'/geolookup/forecast/q/'+newcountry+'/'+new_city+'.json')
+        newcountry = "_".join(country.split(" "))
+        new_city = "_".join(city.split(" "))
+        f = urllib.request.urlopen('http://api.wunderground.com/api/'+api_key+'/geolookup/forecast/q/'+country+'/'+city+'.json')
         json_string = f.read()
         parsed_json = json.loads(json_string)
         day = parsed_json['forecast']['simpleforecast']['forecastday'][0]["date"]["pretty"]
@@ -189,16 +197,16 @@ def index2():
     errors = [v for v in form.errors.values()]
     if len(errors) > 0:
         flash("!!!! ERRORS IN FORM SUBMISSION - " + str(errors))
-    return render_template('index2.html',form=form)
+    return redirect(url_for('formentry'))
 
 @app.route('/nonuscities')
 def non_us_cities():
-    places = Place.query.all()
+    places = Place2.query.all()
     all_locations = []
     for place in places:
-        condition = Conditions.query.filter_by(place_id=place.place_id).first()
-        all_locations.append((place.city, place.state, condition.temperature, condition.weather, condition.observation_time))
-    return render_template('uscity.html', locations=all_locations)
+        forecast = Forecast.query.filter_by(place2_id=place.place2_id).first()
+        all_locations.append((place.city, place.country, forecast.day, forecast.morning_forecast, forecast.evening_forecast))
+    return render_template('nonuscity.html', locations=all_locations)
 
 
 ## Code to run the application...
